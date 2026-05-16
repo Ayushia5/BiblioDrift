@@ -252,7 +252,32 @@ const SAMPLE_BOOKS = {
         }
     ]
 };
+// Action to cache or remove book from local IndexedDB
+async function toggleOfflineBook(book, buttonElement) {
+    try {
+        // Use the global window object database reference
+        const existingBook = await window.db.books.get(book.id);
 
+        if (existingBook) {
+            await window.db.books.delete(book.id);
+            console.log(`"${book.title}" removed from offline shelf.`);
+            updateDownloadIcon(buttonElement, false);
+        } else {
+            await window.db.books.add({
+                id: book.id,
+                title: book.title,
+                author: book.author || 'Unknown Author',
+                content: book.content || book.description || 'No summary available.',
+                mood: book.mood || 'general',
+                coverUrl: book.coverUrl || ''
+            });
+            console.log(`"${book.title}" downloaded for offline reading!`);
+            updateDownloadIcon(buttonElement, true);
+        }
+    } catch (error) {
+        console.error("Failed to alter local shelf cache:", error);
+    }
+}
 class BookshelfRenderer3D {
     constructor() {
         this.tooltip = document.getElementById('book-tooltip');
@@ -682,6 +707,27 @@ class BookshelfRenderer3D {
         spine.addEventListener('mousemove', (e) => this.moveTooltip(e));
         spine.addEventListener('mouseleave', () => this.hideTooltip());
         spine.addEventListener('click', () => this.openModal(book));
+       
+        // Keyboard Accessibility (Issue #534)
+spine.setAttribute('tabindex', '0');
+spine.setAttribute('role', 'button');
+spine.setAttribute('aria-label', `${book.title} by ${book.author}. Rating: ${book.rating}. Press Enter or Space to view details.`);
+
+spine.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        this.openModal(book);
+    }
+});
+
+spine.addEventListener('focus', () => {
+    const rect = spine.getBoundingClientRect();
+    this.showTooltip(
+        { clientX: rect.right, clientY: rect.top + rect.height / 2 },
+        book
+    );
+});
+spine.addEventListener('blur', () => this.hideTooltip());
 
         // Add mood icon if primary mood exists
         if (book.moods && book.moods.length > 0) {
