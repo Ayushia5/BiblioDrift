@@ -16,6 +16,10 @@ class AmbientManager {
         // Defensive check: only initialize if elements exist
         if (!this.toggleBtn || !this.panel) return;
 
+        // ARIA: connect toggle to panel and set initial state
+        this.toggleBtn.setAttribute('aria-controls', 'ambientPanel');
+        this.toggleBtn.setAttribute('aria-expanded', 'false');
+
         this.rainAudio = new Audio('https://archive.org/download/Red_Library_Nature_Rain/R22-25-General%20Rain.mp3');
         this.rainAudio.preload = 'auto';
         this.fireAudio = new Audio('https://archive.org/download/1-hour-cozy-fire-crackling-fireplace-320/1%20hour%20Cozy%20Fire%20Crackling%20Fireplace%20320.mp3');
@@ -62,17 +66,25 @@ class AmbientManager {
     }
 
     init() {
-        // Toggle Panel
+        // Toggle Panel with ARIA and button active animation
         this.toggleBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             this.unlockAudio(); // Explicitly unlock audio here since propagation is stopped!
-            this.panel.classList.toggle('active');
+            const isActive = this.panel.classList.toggle('active');
+            // mirror state on the button for styling and accessibility
+            this.toggleBtn.classList.toggle('active', isActive);
+            this.toggleBtn.setAttribute('aria-expanded', isActive ? 'true' : 'false');
         });
 
-        // Close panel when clicking outside
+        // Close panel when clicking outside (and update ARIA/button state)
         document.addEventListener('click', (e) => {
             if (!this.panel.contains(e.target) && e.target !== this.toggleBtn) {
+                const wasActive = this.panel.classList.contains('active');
                 this.panel.classList.remove('active');
+                if (wasActive) {
+                    this.toggleBtn.classList.remove('active');
+                    this.toggleBtn.setAttribute('aria-expanded', 'false');
+                }
             }
         });
 

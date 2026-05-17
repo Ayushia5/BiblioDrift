@@ -4550,6 +4550,20 @@ main {
     transform: scale(1.05);
 }
 
+/* Animated active state for the sanctuary toggle button */
+#ambientToggle {
+    will-change: transform;
+}
+
+#ambientToggle.active {
+    transform: scale(1.08) rotate(-8deg) !important;
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.32) !important;
+}
+
+#ambientToggle:active {
+    transform: scale(0.96) rotate(-2deg) !important;
+}
+
 .ambient-panel {
     position: absolute;
     bottom: 60px;
@@ -4625,6 +4639,15 @@ main {
     width: 18px;
     left: 4px;
     bottom: 4px;
+}
+
+/* Smooth transitions for switches */
+.slider {
+    transition: background-color 200ms cubic-bezier(.2,.9,.3,1);
+}
+
+.slider:before {
+    transition: transform 200ms cubic-bezier(.2,.9,.3,1), box-shadow 200ms;
 }
 
 input:checked + .slider {
