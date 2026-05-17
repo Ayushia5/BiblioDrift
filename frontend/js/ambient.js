@@ -156,8 +156,9 @@ class AmbientManager {
         // Volume Control
         this.updateVolumeUI = (val) => {
             const pct = Math.round((val || 0) * 100);
-            // update track fill using inline background gradient
-            this.volumeSlider.style.background = `linear-gradient(90deg, var(--accent-gold) ${pct}%, rgba(0,0,0,0.12) ${pct}%)`;
+            // update track fill using numeric CSS variable (0-100)
+            // JS sets a number so CSS can calc offsets (percent + px)
+            this.volumeSlider.style.setProperty('--ambient-fill', `${pct}`);
             // add transient class to animate thumb pop
             this.volumeSlider.classList.add('volume-animate');
             clearTimeout(this._volAnimTimeout);
@@ -173,6 +174,61 @@ class AmbientManager {
             this.oceanAudio.volume = volume;
             this.stormAudio.volume = volume;
             this.updateVolumeUI(volume);
+        });
+
+        // cache the fill element for the track (if present)
+        this.rangeFill = this.panel.querySelector('.volume-control .range-fill');
+
+        // Also attempt to play any checked audio immediately on input (more responsive than 'change')
+        this.volumeSlider.addEventListener('input', () => {
+            const vol = parseFloat(this.volumeSlider.value);
+            console.log('Ambient volume (input):', vol, 'rain paused?', this.rainAudio.paused, 'fire paused?', this.fireAudio.paused);
+            const tryPlayNow = (audio, toggle) => {
+                if (!toggle) return;
+                if (toggle.checked) {
+                    audio.volume = vol;
+                    audio.play().catch(e => {
+                        // log at debug level; autoplay policies may block play()
+                        console.debug('Play attempt blocked:', e);
+                    });
+                }
+            };
+
+            tryPlayNow(this.rainAudio, this.rainToggle);
+            tryPlayNow(this.fireAudio, this.fireToggle);
+            tryPlayNow(this.oceanAudio, this.oceanToggle);
+            tryPlayNow(this.stormAudio, this.stormToggle);
+
+            // update overlay fill width if element exists
+            if (this.rangeFill) {
+                const pct = Math.round(vol * 100);
+                this.rangeFill.style.width = pct + '%';
+            }
+        });
+
+        // Ensure any enabled ambient sound starts playing when the user adjusts volume
+        this.volumeSlider.addEventListener('change', () => {
+            const vol = parseFloat(this.volumeSlider.value);
+            // Debug log to help trace issues where volume changes but no sound is heard
+            console.log('Ambient volume set to', vol);
+
+            const tryPlay = (audio, toggle) => {
+                if (!toggle) return;
+                if (toggle.checked) {
+                    // If audio is paused, try to play at the new volume
+                    if (audio.paused) {
+                        audio.play().catch(e => {
+                            // ignore play errors (browser autoplay policy) but log for debugging
+                            console.debug('Ambient audio play blocked or failed:', e);
+                        });
+                    }
+                }
+            };
+
+            tryPlay(this.rainAudio, this.rainToggle);
+            tryPlay(this.fireAudio, this.fireToggle);
+            tryPlay(this.oceanAudio, this.oceanToggle);
+            tryPlay(this.stormAudio, this.stormToggle);
         });
 
         // Initial sync
