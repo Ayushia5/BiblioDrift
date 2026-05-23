@@ -199,8 +199,19 @@
 
     landingLinks.forEach((link) => {
         link.addEventListener('click', (event) => {
-            const targetHref = link.getAttribute('href');
+            let targetHref = link.getAttribute('href');
             if (!targetHref || targetHref.startsWith('#')) return;
+            
+            // Rewrite index.html to /app in production
+            if (targetHref.startsWith('index.html')) {
+                const isLocalPreview = window.location.protocol === 'file:' ||
+                  ['localhost', '127.0.0.1', ''].includes(window.location.hostname);
+                
+                if (!isLocalPreview) {
+                    targetHref = targetHref.replace('index.html', '/app');
+                }
+            }
+
             event.preventDefault();
             document.body.classList.add('is-leaving');
             window.setTimeout(() => {
