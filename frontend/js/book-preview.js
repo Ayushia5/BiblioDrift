@@ -168,27 +168,15 @@ const BookPreview = (() => {
                         <i class="fa-solid fa-download"></i> Download Card
                     </button>
                 </div>
-
-                <!--  Book card div for image capture -->
-                <div id="book-card" style="
-                    position: absolute;
-                    left: -9999px;
-                    width: 380px;
-                    padding: 32px;
-                    background: #F5F0E8;
-                    border-radius: 16px;
-                    font-family: Georgia, 'Times New Roman', serif;
-                    color: #2C1810;
-                    border: 1px solid #D4C4A8;
-                ">
-                    <p style="font-size:11px;color:#8B6F47;margin:0 0 16px;letter-spacing:2px;text-transform:uppercase;">📚 BiblioDrift</p>
-                    <h2 id="card-title" style="margin:0 0 8px;font-size:26px;font-weight:normal;font-style:italic;color:#1a0f0a;line-height:1.3;"></h2>
-                    <p id="card-author" style="margin:0 0 16px;color:#6B4F35;font-size:14px;letter-spacing:0.5px;"></p>
-                    <div style="width:40px;height:1px;background:#C4A882;margin-bottom:16px;"></div>
-                    <p id="card-rating" style="margin:0 0 12px;font-size:22px;color:#C4902A;"></p>
-                    <p id="card-genre" style="margin:0;font-size:12px;color:#8B6F47;letter-spacing:1.5px;text-transform:uppercase;"></p>
-                    <div style="margin-top:20px;padding-top:16px;border-top:1px solid #D4C4A8;">
-                        <p style="margin:0;font-size:10px;color:#A89070;letter-spacing:1px;font-style:italic;">Currently Reading</p>
+                <div id="book-card" class="book-card">
+                    <p class="book-card__branding">📚 BiblioDrift</p>
+                    <h2 id="card-title" class="book-card__title"></h2>
+                    <p id="card-author" class="book-card__author"></p>
+                    <div class="book-card__divider"></div>
+                    <p id="card-rating" class="book-card__rating"></p>
+                    <p id="card-genre" class="book-card__genre"></p>
+                    <div class="book-card__footer">
+                        <p class="book-card__tagline">Currently Reading</p>
                     </div>
                 </div>
             </div>
@@ -356,7 +344,7 @@ const BookPreview = (() => {
         if (genreEl)  genreEl.textContent  = genre  || '';
     }
 
-    return { open, populateBookCard };
+    return { open };
 
 })();
 
